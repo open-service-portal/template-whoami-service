@@ -1,7 +1,7 @@
 # WhoAmIService Composition - Orchestrates WhoAmI + CloudflareDNSRecord
 # Purpose: Creates both application and DNS record, extracting IP from Ingress
 # Restaurant Analogy: The "combo preparation" - coordinate app and DNS together
-apiVersion: apiextensions.crossplane.io/v1
+apiVersion: apiextensions.crossplane.io/v2
 kind: Composition
 metadata:
   name: whoamiservice
