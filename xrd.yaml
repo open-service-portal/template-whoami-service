@@ -1,10 +1,12 @@
 # WhoAmIService XRD - Composition of Compositions
 # Purpose: Define a complete service with app deployment + DNS record
 # Restaurant Analogy: A "combo meal" - app + DNS bundled together
-apiVersion: apiextensions.crossplane.io/v1
+apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
   name: whoamiservices.demo.openportal.dev
+  labels:
+    terasky.backstage.io/generate-form: "true"
   annotations:
     crossplane.io/version: "v2.0"
     description: "WhoAmI application with automatic DNS configuration"
@@ -15,6 +17,7 @@ metadata:
     terasky.backstage.io/lifecycle: 'production'
     terasky.backstage.io/dependsOn: 'Component:template-whoami,Component:template-cloudflare-dnsrecord'
 spec:
+  scope: Namespaced
   group: demo.openportal.dev
   scope: Namespaced  # Crossplane v2 - XRs can be created in any namespace
   names:
