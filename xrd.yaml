@@ -1,0 +1,82 @@
+# WhoAmIService XRD - Composition of Compositions
+# Purpose: Define a complete service with app deployment + DNS record
+# Restaurant Analogy: A "combo meal" - app + DNS bundled together
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: whoamiservices.demo.openportal.dev
+  annotations:
+    crossplane.io/version: "v2.0"
+    description: "WhoAmI application with automatic DNS configuration"
+spec:
+  group: demo.openportal.dev
+  names:
+    kind: WhoAmIService
+    plural: whoamiservices
+  defaultCompositionRef:
+    name: whoamiservice
+  versions:
+  - name: v1alpha1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              # Application parameters (passed to WhoAmI XR)
+              name:
+                type: string
+                description: Service name (becomes subdomain, e.g., myapp.example.com)
+                pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
+                minLength: 1
+                maxLength: 63
+              replicas:
+                type: integer
+                description: Number of application replicas
+                default: 1
+                minimum: 1
+                maximum: 5
+              image:
+                type: string
+                description: Container image to deploy
+                default: "traefik/whoami:v1.10.1"
+              
+              # DNS parameters (passed to CloudflareDNSRecord XR)
+              zone:
+                type: string
+                description: Cloudflare Zone resource name (run 'kubectl get zones.zone.cloudflare.upbound.io' to list)
+                default: "openportal-zone"
+              proxied:
+                type: boolean
+                description: Enable Cloudflare proxy (orange cloud)
+                default: false
+              ttl:
+                type: integer
+                description: DNS TTL in seconds (1 = automatic)
+                default: 1
+                minimum: 1
+                maximum: 86400
+            required:
+              - name
+          status:
+            type: object
+            properties:
+              # Combined status from both XRs
+              appReady:
+                type: boolean
+                description: Whether the application is deployed and ready
+              dnsReady:
+                type: boolean
+                description: Whether the DNS record is configured
+              domain:
+                type: string
+                description: The full domain name for accessing the service
+              ipAddress:
+                type: string
+                description: The IP address the DNS points to
+              ingressHost:
+                type: string
+                description: The ingress hostname

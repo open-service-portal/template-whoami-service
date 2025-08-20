@@ -1,0 +1,173 @@
+# WhoAmIService Composition - Orchestrates WhoAmI + CloudflareDNSRecord
+# Purpose: Creates both application and DNS record, extracting IP from Ingress
+# Restaurant Analogy: The "combo preparation" - coordinate app and DNS together
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: whoamiservice
+  labels:
+    type: service
+    provider: composite
+spec:
+  compositeTypeRef:
+    apiVersion: demo.openportal.dev/v1alpha1
+    kind: WhoAmIService
+  
+  mode: Pipeline
+  pipeline:
+  
+  # Step 1: Load environment configuration for DNS zone info
+  - step: load-environment
+    functionRef:
+      name: function-environment-configs
+    input:
+      apiVersion: environmentconfigs.fn.crossplane.io/v1beta1
+      kind: Input
+      spec:
+        environmentConfigs:
+        - type: Reference
+          ref:
+            name: dns-config
+  
+  # Step 2: Create the WhoAmI application using go-templating
+  - step: create-app
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $name := .observed.composite.resource.spec.name }}
+          {{- $replicas := .observed.composite.resource.spec.replicas | default 1 }}
+          {{- $image := .observed.composite.resource.spec.image | default "traefik/whoami:v1.10.1" }}
+          {{- $xrName := .observed.composite.resource.metadata.name }}
+          
+          # Create WhoAmI XR (reuses existing template-whoami)
+          apiVersion: demo.openportal.dev/v1alpha1
+          kind: WhoAmIApp
+          metadata:
+            name: {{ $xrName }}-app
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: whoami-app
+              gotemplating.fn.crossplane.io/ready: "True"
+          spec:
+            name: {{ $name }}
+            replicas: {{ $replicas }}
+            image: {{ $image }}
+  
+  # Step 3: Wait for app to be ready and extract Ingress information
+  - step: wait-app-ready
+    functionRef:
+      name: function-auto-ready
+    input:
+      apiVersion: autoready.fn.crossplane.io/v1beta1
+      kind: Input
+      # This function will wait for the WhoAmI XR to be ready
+      # and make its status available to subsequent steps
+  
+  # Step 4: Create DNS record pointing to the application
+  - step: create-dns
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $name := .observed.composite.resource.spec.name }}
+          {{- $zone := .observed.composite.resource.spec.zone | default "openportal-zone" }}
+          {{- $proxied := .observed.composite.resource.spec.proxied | default false }}
+          {{- $ttl := .observed.composite.resource.spec.ttl | default 1 }}
+          {{- $xrName := .observed.composite.resource.metadata.name }}
+          
+          {{/* Get the domain from environment config */}}
+          {{- $envZone := index .context "apiextensions.crossplane.io/environment" "zone" | default "localhost" }}
+          
+          {{/* Try to get the Ingress IP from the app - this will be available after auto-ready */}}
+          {{- $ingressIP := "" }}
+          {{- range .observed.resources }}
+            {{- if eq .resource.kind "Object" }}
+              {{- if .resource.spec.forProvider.manifest }}
+                {{- if eq .resource.spec.forProvider.manifest.kind "Ingress" }}
+                  {{- if .resource.status.atProvider.manifest.status.loadBalancer.ingress }}
+                    {{- $ingressIP = (index .resource.status.atProvider.manifest.status.loadBalancer.ingress 0).ip | default "" }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          
+          {{/* Default to a placeholder IP if we can't get the real one yet */}}
+          {{- if not $ingressIP }}
+            {{- $ingressIP = "192.168.1.100" }}
+          {{- end }}
+          
+          # Create CloudflareDNSRecord XR (reuses existing template-cloudflare-dnsrecord)
+          apiVersion: platform.io/v1alpha1
+          kind: CloudflareDNSRecord
+          metadata:
+            name: {{ $xrName }}-dns
+            annotations:
+              gotemplating.fn.crossplane.io/composition-resource-name: cloudflare-dns
+          spec:
+            type: A
+            name: {{ $name }}
+            value: {{ $ingressIP | quote }}
+            zone: {{ $zone | quote }}
+            proxied: {{ $proxied }}
+            ttl: {{ $ttl }}
+            comment: "Managed by WhoAmIService {{ $xrName }}"
+  
+  # Step 5: Update composite status with combined information
+  - step: update-status
+    functionRef:
+      name: function-go-templating
+    input:
+      apiVersion: gotemplating.crossplane.io/v1beta1
+      kind: GoTemplate
+      source: Inline
+      inline:
+        template: |
+          {{- $name := .observed.composite.resource.spec.name }}
+          {{- $envZone := index .context "apiextensions.crossplane.io/environment" "zone" | default "localhost" }}
+          {{- $domain := printf "%s.%s" $name $envZone }}
+          
+          {{/* Extract status from created XRs */}}
+          {{- $appReady := false }}
+          {{- $dnsReady := false }}
+          {{- $ingressIP := "" }}
+          
+          {{- range .observed.resources }}
+            {{- if eq .resource.kind "WhoAmIApp" }}
+              {{- if .resource.status.conditions }}
+                {{- range .resource.status.conditions }}
+                  {{- if and (eq .type "Ready") (eq .status "True") }}
+                    {{- $appReady = true }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+            {{- if eq .resource.kind "CloudflareDNSRecord" }}
+              {{- if .resource.status.conditions }}
+                {{- range .resource.status.conditions }}
+                  {{- if and (eq .type "Ready") (eq .status "True") }}
+                    {{- $dnsReady = true }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          
+          # Update composite status
+          apiVersion: meta.crossplane.io/v1alpha1
+          kind: CompositeResourceStatus
+          status:
+            appReady: {{ $appReady }}
+            dnsReady: {{ $dnsReady }}
+            domain: {{ $domain | quote }}
+            {{- if $ingressIP }}
+            ipAddress: {{ $ingressIP | quote }}
+            {{- end }}

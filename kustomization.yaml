@@ -1,0 +1,13 @@
+# Kustomization for WhoAmI Service Template
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - xrd.yaml
+  - composition.yaml
+
+# Optional: Add common labels
+commonLabels:
+  template.openportal.dev/type: service
+  template.openportal.dev/name: whoami-service
+  template.openportal.dev/version: v1alpha1

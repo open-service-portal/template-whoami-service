@@ -1,0 +1,14 @@
+# Basic WhoAmIService Example
+# Creates a simple whoami app with automatic DNS configuration
+apiVersion: demo.openportal.dev/v1alpha1
+kind: WhoAmIService
+metadata:
+  name: demo-service
+spec:
+  name: demo  # Will create demo.openportal.dev (or configured zone)
+  # All other parameters use defaults:
+  # - replicas: 1
+  # - image: traefik/whoami:v1.10.1
+  # - zone: openportal-zone
+  # - proxied: false
+  # - ttl: 1 (automatic)
