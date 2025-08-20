@@ -1,7 +1,7 @@
 # WhoAmIService XRD - Composition of Compositions
 # Purpose: Define a complete service with app deployment + DNS record
 # Restaurant Analogy: A "combo meal" - app + DNS bundled together
-apiVersion: apiextensions.crossplane.io/v1
+apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
   name: whoamiservices.demo.openportal.dev
@@ -11,6 +11,7 @@ metadata:
     crossplane.io/version: "v2.0"
     description: "WhoAmI application with automatic DNS configuration"
 spec:
+  scope: Namespaced
   group: demo.openportal.dev
   names:
     kind: WhoAmIService
