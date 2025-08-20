@@ -8,6 +8,12 @@ metadata:
   annotations:
     crossplane.io/version: "v2.0"
     description: "WhoAmI application with automatic DNS configuration"
+    terasky.backstage.io/add-to-catalog: 'true'
+    terasky.backstage.io/owner: 'platform-team'
+    terasky.backstage.io/system: 'infrastructure-templates'
+    terasky.backstage.io/component-type: 'crossplane-template'
+    terasky.backstage.io/lifecycle: 'production'
+    terasky.backstage.io/dependsOn: 'Component:template-whoami,Component:template-cloudflare-dnsrecord'
 spec:
   group: demo.openportal.dev
   names:
