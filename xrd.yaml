@@ -5,6 +5,8 @@ apiVersion: apiextensions.crossplane.io/v1
 kind: CompositeResourceDefinition
 metadata:
   name: whoamiservices.demo.openportal.dev
+  labels:
+    terasky.backstage.io/generate-form: "true"
   annotations:
     crossplane.io/version: "v2.0"
     description: "WhoAmI application with automatic DNS configuration"
