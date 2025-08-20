@@ -17,9 +17,8 @@ metadata:
     terasky.backstage.io/lifecycle: 'production'
     terasky.backstage.io/dependsOn: 'Component:template-whoami,Component:template-cloudflare-dnsrecord'
 spec:
-  scope: Namespaced
-  group: demo.openportal.dev
   scope: Namespaced  # Crossplane v2 - XRs can be created in any namespace
+  group: demo.openportal.dev
   names:
     kind: WhoAmIService
     plural: whoamiservices
