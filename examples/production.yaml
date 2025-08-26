@@ -1,6 +1,6 @@
 # Production WhoAmIService Example
 # Full configuration with custom settings
-apiVersion: demo.openportal.dev/v1alpha1
+apiVersion: openportal.dev/v1alpha1
 kind: WhoAmIService
 metadata:
   name: prod-app-service
