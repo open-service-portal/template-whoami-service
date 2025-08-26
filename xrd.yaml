@@ -4,7 +4,7 @@
 apiVersion: apiextensions.crossplane.io/v2
 kind: CompositeResourceDefinition
 metadata:
-  name: whoamiservices.demo.openportal.dev
+  name: whoamiservices.openportal.dev
   labels:
     terasky.backstage.io/generate-form: "true"
   annotations:
@@ -18,7 +18,7 @@ metadata:
     terasky.backstage.io/dependsOn: 'Component:template-whoami,Component:template-cloudflare-dnsrecord'
 spec:
   scope: Namespaced  # Crossplane v2 - XRs can be created in any namespace
-  group: demo.openportal.dev
+  group: openportal.dev
   names:
     kind: WhoAmIService
     plural: whoamiservices

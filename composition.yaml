@@ -10,7 +10,7 @@ metadata:
     provider: composite
 spec:
   compositeTypeRef:
-    apiVersion: demo.openportal.dev/v1alpha1
+    apiVersion: openportal.dev/v1alpha1
     kind: WhoAmIService
   
   mode: Pipeline
@@ -45,7 +45,7 @@ spec:
           {{- $xrName := .observed.composite.resource.metadata.name }}
           
           # Create WhoAmI XR (reuses existing template-whoami)
-          apiVersion: demo.openportal.dev/v1alpha1
+          apiVersion: openportal.dev/v1alpha1
           kind: WhoAmIApp
           metadata:
             name: {{ $xrName }}-app
