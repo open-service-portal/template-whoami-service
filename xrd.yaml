@@ -7,10 +7,9 @@ metadata:
   name: whoamiservices.openportal.dev
   labels:
     terasky.backstage.io/generate-form: "true"
-    openportal.dev/tag-service: "true"
-    openportal.dev/tag-composite: "true"
   annotations:
     crossplane.io/version: "v2.0"
+    openportal.dev/tags: "service,composite"
     description: "WhoAmI application with automatic DNS configuration"
     terasky.backstage.io/add-to-catalog: 'true'
     terasky.backstage.io/owner: 'platform-team'
