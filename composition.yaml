@@ -43,12 +43,14 @@ spec:
           {{- $replicas := .observed.composite.resource.spec.replicas | default 1 }}
           {{- $image := .observed.composite.resource.spec.image | default "traefik/whoami:v1.10.1" }}
           {{- $xrName := .observed.composite.resource.metadata.name }}
+          {{- $xrNamespace := .observed.composite.resource.metadata.namespace }}
           
           # Create WhoAmI XR (reuses existing template-whoami)
           apiVersion: openportal.dev/v1alpha1
           kind: WhoAmIApp
           metadata:
             name: {{ $xrName }}-app
+            namespace: {{ $xrNamespace }}
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: whoami-app
               gotemplating.fn.crossplane.io/ready: "True"
