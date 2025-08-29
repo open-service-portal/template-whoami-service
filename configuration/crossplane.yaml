@@ -1,0 +1,17 @@
+---
+# Crossplane Configuration Package metadata
+# This file defines how the package is built and published
+apiVersion: meta.pkg.crossplane.io/v1
+kind: Configuration
+metadata:
+  name: configuration-whoami-service
+  labels:
+    provider: composite
+    type: service
+    openportal.dev/template: "true"
+spec:
+  # Crossplane version compatibility
+  crossplane:
+    version: ">=v2.0.0"
+  
+  # No provider dependencies - this composes other XRs
