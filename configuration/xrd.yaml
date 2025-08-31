@@ -8,6 +8,7 @@ metadata:
   labels:
     terasky.backstage.io/generate-form: "true"
   annotations:
+    backstage.io/source-location: "url:https://github.com/open-service-portal/template-whoami-service"
     crossplane.io/version: "v2.0"
     openportal.dev/tags: "service,composite"
     description: "WhoAmI application with automatic DNS configuration"
