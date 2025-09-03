@@ -1,19 +1,17 @@
 # Production WhoAmIService Example
-# Full configuration with custom settings
+# Simple production deployment with just a name
 apiVersion: openportal.dev/v1alpha1
 kind: WhoAmIService
 metadata:
   name: prod-app-service
+  namespace: production
   labels:
     environment: production
     team: platform
 spec:
-  # Application configuration
-  name: api         # Creates api.openportal.dev
-  replicas: 3       # High availability
-  image: "myregistry/myapp:v2.0.0"  # Custom application image
-  
-  # DNS configuration
-  zone: "openportal-zone"  # Specific zone (run: kubectl get zones.zone.cloudflare.upbound.io)
-  proxied: true            # Enable Cloudflare proxy (DDoS protection, CDN)
-  ttl: 300                 # 5 minutes TTL for faster updates
+  name: api  # Creates api.openportal.dev
+  # The simplified service provides production-ready defaults:
+  # - Single replica of the demo app (scale handled at ingress level)
+  # - DNS with 300 second TTL for stability
+  # - Direct connection (no proxy) for lower latency
+  # - Automatic ingress configuration

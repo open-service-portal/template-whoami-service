@@ -38,39 +38,13 @@ spec:
           spec:
             type: object
             properties:
-              # Application parameters (passed to WhoAmI XR)
+              # Only the service name is required - everything else uses sensible defaults
               name:
                 type: string
                 description: Service name (becomes subdomain, e.g., myapp.example.com)
                 pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$"
                 minLength: 1
                 maxLength: 63
-              replicas:
-                type: integer
-                description: Number of application replicas
-                default: 1
-                minimum: 1
-                maximum: 5
-              image:
-                type: string
-                description: Container image to deploy
-                default: "traefik/whoami:v1.10.1"
-              
-              # DNS parameters (passed to CloudflareDNSRecord XR)
-              zone:
-                type: string
-                description: Cloudflare Zone resource name (run 'kubectl get zones.zone.cloudflare.upbound.io' to list)
-                default: "openportal-zone"
-              proxied:
-                type: boolean
-                description: Enable Cloudflare proxy (orange cloud)
-                default: false
-              ttl:
-                type: integer
-                description: DNS TTL in seconds (1 = automatic)
-                default: 1
-                minimum: 1
-                maximum: 86400
             required:
               - name
           status:

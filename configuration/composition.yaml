@@ -40,8 +40,6 @@ spec:
       inline:
         template: |
           {{- $name := .observed.composite.resource.spec.name }}
-          {{- $replicas := .observed.composite.resource.spec.replicas | default 1 }}
-          {{- $image := .observed.composite.resource.spec.image | default "traefik/whoami:v1.10.1" }}
           {{- $xrName := .observed.composite.resource.metadata.name }}
           {{- $xrNamespace := .observed.composite.resource.metadata.namespace }}
           
@@ -56,8 +54,8 @@ spec:
               gotemplating.fn.crossplane.io/ready: "True"
           spec:
             name: {{ $name }}
-            replicas: {{ $replicas }}
-            image: {{ $image }}
+            replicas: 1
+            image: "traefik/whoami:v1.10.1"
   
   # Step 3: Wait for app to be ready and extract Ingress information
   - step: wait-app-ready
@@ -80,9 +78,6 @@ spec:
       inline:
         template: |
           {{- $name := .observed.composite.resource.spec.name }}
-          {{- $zone := .observed.composite.resource.spec.zone | default "openportal-zone" }}
-          {{- $proxied := .observed.composite.resource.spec.proxied | default false }}
-          {{- $ttl := .observed.composite.resource.spec.ttl | default 1 }}
           {{- $xrName := .observed.composite.resource.metadata.name }}
           {{- $xrNamespace := .observed.composite.resource.metadata.namespace }}
           
@@ -120,10 +115,10 @@ spec:
             type: A
             name: {{ $name }}
             value: {{ $ingressIP | quote }}
-            zone: {{ $zone | quote }}
-            proxied: {{ $proxied }}
-            ttl: {{ $ttl }}
-            comment: "Managed by WhoAmIService {{ $xrName }}"
+            # Using defaults for simplicity:
+            # zone: "openportal-zone" (default)
+            # proxied: false (default)  
+            # ttl: 1 (automatic, default)
   
   # Step 5: Update composite status with combined information
   - step: update-status
