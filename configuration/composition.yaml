@@ -84,6 +84,7 @@ spec:
           {{- $proxied := .observed.composite.resource.spec.proxied | default false }}
           {{- $ttl := .observed.composite.resource.spec.ttl | default 1 }}
           {{- $xrName := .observed.composite.resource.metadata.name }}
+          {{- $xrNamespace := .observed.composite.resource.metadata.namespace }}
           
           {{/* Get the domain from environment config */}}
           {{- $envZone := index .context "apiextensions.crossplane.io/environment" "zone" | default "localhost" }}
@@ -108,10 +109,11 @@ spec:
           {{- end }}
           
           # Create CloudflareDNSRecord XR (reuses existing template-cloudflare-dnsrecord)
-          apiVersion: platform.io/v1alpha1
+          apiVersion: openportal.dev/v1alpha1
           kind: CloudflareDNSRecord
           metadata:
             name: {{ $xrName }}-dns
+            namespace: {{ $xrNamespace }}
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: cloudflare-dns
           spec:
@@ -164,8 +166,8 @@ spec:
           {{- end }}
           
           # Update composite status
-          apiVersion: meta.crossplane.io/v1alpha1
-          kind: CompositeResourceStatus
+          apiVersion: openportal.dev/v1alpha1
+          kind: WhoAmIService
           status:
             appReady: {{ $appReady }}
             dnsReady: {{ $dnsReady }}
