@@ -18,7 +18,7 @@ metadata:
     terasky.backstage.io/system: 'infrastructure-templates'
     terasky.backstage.io/component-type: 'crossplane-template'
     terasky.backstage.io/lifecycle: 'production'
-    terasky.backstage.io/dependsOn: 'Component:template-whoami,Component:template-cloudflare-dnsrecord'
+    terasky.backstage.io/dependsOn: 'template:default/whoamiapps.openportal.dev-v1alpha1,template:default/dnsrecords.openportal.dev-v1alpha1'
 spec:
   scope: Namespaced  # Crossplane v2 - XRs can be created in any namespace
   group: openportal.dev
