@@ -98,6 +98,7 @@ spec:
             namespace: {{ $xrNamespace }}
             annotations:
               gotemplating.fn.crossplane.io/composition-resource-name: cloudflare-dns
+              gotemplating.fn.crossplane.io/ready: "True"
           spec:
             type: A
             name: {{ $name }}
