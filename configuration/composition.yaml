@@ -81,24 +81,11 @@ spec:
           {{- $xrName := .observed.composite.resource.metadata.name }}
           {{- $xrNamespace := .observed.composite.resource.metadata.namespace }}
           
-          {{/* Get the domain from environment config */}}
+          {{/* Get the domain and ingress IP from environment config */}}
           {{- $envZone := index .context "apiextensions.crossplane.io/environment" "zone" | default "localhost" }}
+          {{- $ingressIP := index .context "apiextensions.crossplane.io/environment" "ingressIP" | default "" }}
           
-          {{/* Try to get the Ingress IP from the app - this will be available after auto-ready */}}
-          {{- $ingressIP := "" }}
-          {{- range .observed.resources }}
-            {{- if eq .resource.kind "Object" }}
-              {{- if .resource.spec.forProvider.manifest }}
-                {{- if eq .resource.spec.forProvider.manifest.kind "Ingress" }}
-                  {{- if .resource.status.atProvider.manifest.status.loadBalancer.ingress }}
-                    {{- $ingressIP = (index .resource.status.atProvider.manifest.status.loadBalancer.ingress 0).ip | default "" }}
-                  {{- end }}
-                {{- end }}
-              {{- end }}
-            {{- end }}
-          {{- end }}
-          
-          {{/* Default to a placeholder IP if we can't get the real one yet */}}
+          {{/* If no ingress IP in environment, use default */}}
           {{- if not $ingressIP }}
             {{- $ingressIP = "192.168.1.100" }}
           {{- end }}
@@ -156,6 +143,10 @@ spec:
                     {{- $dnsReady = true }}
                   {{- end }}
                 {{- end }}
+              {{- end }}
+              {{/* Also extract the IP from the DNS record */}}
+              {{- if .resource.spec.value }}
+                {{- $ingressIP = .resource.spec.value }}
               {{- end }}
             {{- end }}
           {{- end }}
